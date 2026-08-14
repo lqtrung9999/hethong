@@ -14,31 +14,35 @@
     :root{--navy:#0b1428;--navy2:#121d35;--red:#b91f23;--red2:#8c171c;--gold:#ffd21c;--ink:#19243a;--muted:#66758f;--line:#dce3ee;--green:#16a34a;--soft:#f6f8fc}
     *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--navy);color:#fff;font:16px Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}button,input{font:inherit}
     .shell{min-height:100vh;background:radial-gradient(circle at 82% 8%,rgba(255,210,28,.08),transparent 27%),linear-gradient(135deg,#0b1428,#101a31 70%,#0b1428)}
-    .hero{max-width:1180px;margin:auto;padding:54px 34px 46px}.top{display:flex;justify-content:space-between;align-items:center;gap:24px;margin-bottom:56px}.brand{display:flex;align-items:center}.brand-logo{display:block;width:230px;height:118px;object-fit:contain;object-position:left center;filter:drop-shadow(0 8px 22px rgba(255,196,18,.16))}.support{color:#cbd3e1;font-size:14px}.support strong{color:#fff}
+    .hero{max-width:1180px;min-height:100vh;margin:auto;padding:54px 34px 64px;display:flex;flex-direction:column}.top{display:flex;justify-content:space-between;align-items:center;gap:24px;margin-bottom:18px}.hero-content{flex:1;display:flex;flex-direction:column;align-items:flex-start;justify-content:space-evenly;gap:28px;padding:12px 0}.search-area{width:100%}.brand{display:flex;align-items:center}.brand-logo{display:block;width:230px;height:118px;object-fit:contain;object-position:left center;filter:drop-shadow(0 8px 22px rgba(255,196,18,.16))}.support{color:#cbd3e1;font-size:14px}.support strong{color:#fff}
     .badge{display:inline-flex;align-items:center;gap:12px;max-width:100%;padding:12px 20px;border:1px solid #e33b3f;border-radius:999px;background:linear-gradient(90deg,var(--red2),var(--red));color:var(--gold);font-weight:800;line-height:1.35}.badge i{width:13px;height:13px;min-width:13px;border-radius:50%;background:var(--gold);box-shadow:0 0 16px var(--gold)}
-    h1{max-width:none;font-size:clamp(30px,4vw,52px);line-height:1.08;letter-spacing:.015em;margin:30px 0;color:var(--gold);font-weight:950;text-transform:uppercase;text-shadow:0 5px 24px rgba(255,210,28,.2);white-space:nowrap}
+    h1{max-width:none;font-size:clamp(30px,4vw,52px);line-height:1.08;letter-spacing:.015em;margin:0;color:var(--gold);font-weight:950;text-transform:uppercase;text-shadow:0 5px 24px rgba(255,210,28,.2);white-space:nowrap}
     .search{display:grid;grid-template-columns:56px 1fr auto;align-items:center;max-width:1020px;background:#fff;border:3px solid #f2c9ca;border-radius:20px;padding:12px 14px 12px 22px;box-shadow:0 24px 70px rgba(0,0,0,.28)}.search svg{color:var(--red)}.search input{width:100%;border:0;outline:0;color:var(--ink);font-weight:750;font-size:22px;text-transform:uppercase;padding:18px 10px;background:transparent}.search input::placeholder{color:#8995aa;text-transform:none;font-weight:600}.search button{border:0;border-radius:14px;background:var(--red);color:var(--gold);font-weight:850;font-size:20px;padding:20px 34px;cursor:pointer;box-shadow:0 9px 20px rgba(185,31,35,.28);transition:.2s}.search button:hover{transform:translateY(-2px);background:#ca252a}.search button:disabled{opacity:.65;cursor:wait;transform:none}.hint{margin:15px 3px 0;color:#aeb8cb;font-size:14px}.hint code{color:#fff;background:rgba(255,255,255,.08);padding:3px 7px;border-radius:5px}
-    .tagline{margin:34px 0 0;color:#fff;font-size:clamp(18px,2vw,25px);font-weight:650;letter-spacing:.06em}
+    .tagline{margin:0;color:#fff;font-size:clamp(18px,2vw,25px);font-weight:650;letter-spacing:.06em}
     .result-wrap{background:#eef2f8;color:var(--ink);padding:50px 24px 70px}.result{max-width:1080px;margin:auto}.hidden{display:none!important}.notice{max-width:1080px;margin:auto;background:#fff;border:1px solid var(--line);border-radius:18px;padding:34px;text-align:center;box-shadow:0 10px 30px rgba(26,39,67,.08)}.notice h2{margin:0 0 10px}.notice p{margin:0;color:var(--muted);line-height:1.6}.error-icon{display:grid;place-items:center;margin:0 auto 17px;width:52px;height:52px;border-radius:50%;background:#fee2e2;color:var(--red);font-weight:900;font-size:24px}
     .order-head{display:flex;justify-content:space-between;align-items:center;gap:24px;background:linear-gradient(110deg,var(--red2),var(--red));padding:26px 30px;border-radius:22px 22px 0 0;color:#fff;border-bottom:5px solid var(--gold)}.eyebrow{color:var(--gold);font-weight:800;text-transform:uppercase;letter-spacing:.08em;font-size:13px}.order-code{font-size:29px;font-weight:900;letter-spacing:.02em;margin-top:5px}.close{border:0;width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.14);color:#ffc9ca;font-size:28px;cursor:pointer}
     .summary{display:grid;grid-template-columns:1fr 1fr;gap:20px;background:#fff;padding:28px 30px 10px}.summary-card{background:var(--soft);border:1px solid var(--line);border-radius:14px;padding:20px}.label{color:var(--muted);font-size:12px;font-weight:850;letter-spacing:.1em;text-transform:uppercase}.status-text{font-size:24px;font-weight:900;color:var(--red);margin-top:10px}.location{font-size:20px;font-weight:850;margin-top:10px}
     .timeline-card{background:#fff;padding:24px 30px 34px;border-radius:0 0 22px 22px}.timeline{position:relative;margin:8px 0 0;padding:0;list-style:none}.timeline:before{content:"";position:absolute;left:13px;top:15px;bottom:24px;width:3px;background:var(--line)}.event{position:relative;padding:0 0 28px 48px}.event:last-child{padding-bottom:0}.dot{position:absolute;left:2px;top:3px;width:25px;height:25px;border-radius:50%;border:4px solid #fff;background:#fff;box-shadow:0 0 0 3px #c7d1df}.event.done .dot{background:var(--green);box-shadow:0 0 0 3px var(--green)}.event.active .dot{background:var(--gold);box-shadow:0 0 0 3px var(--red)}.event-time{color:var(--muted);font-size:14px;font-weight:800;margin-bottom:5px}.event-title{font-size:20px;font-weight:850}.event-detail{margin-top:5px;color:var(--muted);white-space:pre-line;line-height:1.65}.event.pending .event-title,.event.pending .event-time{color:#9aa6b8}.privacy{font-size:12px;color:#7d899b;text-align:center;margin-top:18px;line-height:1.5}
-    @media(max-width:700px){.hero{padding:28px 18px 34px}.top{margin-bottom:38px}.brand-logo{width:180px;height:92px}.support{display:none}h1{font-size:clamp(25px,8vw,38px);white-space:normal}.search{grid-template-columns:38px 1fr;padding:9px 12px 9px 16px}.search input{font-size:17px;padding:16px 4px}.search button{grid-column:1/-1;width:100%;padding:15px;margin-top:4px}.tagline{margin-top:26px}.result-wrap{padding:24px 12px 40px}.order-head,.summary,.timeline-card{padding-left:20px;padding-right:20px}.summary{grid-template-columns:1fr}.order-code{font-size:22px}.event-title{font-size:17px}}
+    @media(max-width:700px){.hero{min-height:auto;padding:28px 18px 40px}.top{margin-bottom:34px}.hero-content{display:flex;gap:30px;padding:0}.brand-logo{width:180px;height:92px}.support{display:none}h1{font-size:clamp(25px,8vw,38px);white-space:normal}.search{grid-template-columns:38px 1fr;padding:9px 12px 9px 16px}.search input{font-size:17px;padding:16px 4px}.search button{grid-column:1/-1;width:100%;padding:15px;margin-top:4px}.result-wrap{padding:24px 12px 40px}.order-head,.summary,.timeline-card{padding-left:20px;padding-right:20px}.summary{grid-template-columns:1fr}.order-code{font-size:22px}.event-title{font-size:17px}}
   </style>
 </head>
 <body>
 <main class="shell">
   <section class="hero">
     <div class="top"><a class="brand" href="{{ url('/') }}" aria-label="Kim Thành Tín Logistics"><img class="brand-logo" src="{{ asset('frontend/images/logo-ktt.png') }}" alt="Logo Kim Thành Tín Logistics"></a><div class="support">Hỗ trợ tra cứu: <strong>Liên hệ nhân viên phụ trách</strong></div></div>
-    <div class="badge"><i></i> Uỷ Thác XNK &amp; Vận Chuyển Chính Ngạch Trung – Việt</div>
-    <h1>Tra Cứu Hành Trình Đơn Hàng</h1>
-    <form class="search" id="searchForm">
-      <svg width="29" height="29" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg>
-      <input id="orderInput" autocomplete="off" spellcheck="false" aria-label="Mã vận đơn" placeholder="Nhập mã hàng của bạn" maxlength="40">
-      <button id="searchButton" type="submit">Tra cứu&nbsp; →</button>
-    </form>
-    <p class="hint">Ví dụ: <code>CN081106-38HN</code> hoặc <code>CN081110-6HN</code></p>
-    <p class="tagline">“Vận chuyển Thần Tốc Xuyên Biên Giới”</p>
+    <div class="hero-content">
+      <div class="badge"><i></i> Uỷ Thác XNK &amp; Vận Chuyển Chính Ngạch Trung – Việt</div>
+      <h1>Tra Cứu Hành Trình Đơn Hàng</h1>
+      <div class="search-area">
+        <form class="search" id="searchForm">
+          <svg width="29" height="29" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg>
+          <input id="orderInput" autocomplete="off" spellcheck="false" aria-label="Mã vận đơn" placeholder="Nhập mã hàng của bạn" maxlength="40">
+          <button id="searchButton" type="submit">Tra cứu&nbsp; →</button>
+        </form>
+        <p class="hint">Ví dụ: <code>CN081106-38HN</code> hoặc <code>CN081110-6HN</code></p>
+      </div>
+      <p class="tagline">“Vận chuyển Thần Tốc Xuyên Biên Giới”</p>
+    </div>
   </section>
 </main>
 <section class="result-wrap hidden" id="resultWrap" aria-live="polite">
