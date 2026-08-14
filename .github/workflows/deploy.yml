@@ -1,0 +1,77 @@
+name: Deploy tra cuu don hang
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: production-kimthanhtinlogistics
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          coverage: none
+
+      - name: Validate deployment files
+        run: |
+          php -l routes/tra-cuu-don-hang.php
+          test -s resources/views/frontend/pages/tra-cuu-don-hang.blade.php
+
+  deploy:
+    needs: validate
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Configure SSH
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H "$DEPLOY_HOST" >> ~/.ssh/known_hosts
+
+      - name: Upload tracking page
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_PORT: ${{ secrets.DEPLOY_PORT }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+        run: |
+          scp -P "$DEPLOY_PORT" -i ~/.ssh/deploy_key \
+            resources/views/frontend/pages/tra-cuu-don-hang.blade.php \
+            "$DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH/resources/views/frontend/pages/tra-cuu-don-hang.blade.php"
+          scp -P "$DEPLOY_PORT" -i ~/.ssh/deploy_key \
+            routes/tra-cuu-don-hang.php \
+            "$DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH/routes/tra-cuu-don-hang.php"
+
+      - name: Clear Laravel cache
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_PORT: ${{ secrets.DEPLOY_PORT }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+        run: |
+          ssh -p "$DEPLOY_PORT" -i ~/.ssh/deploy_key "$DEPLOY_USER@$DEPLOY_HOST" \
+            "cd '$DEPLOY_PATH' && php artisan optimize:clear"
+
+      - name: Verify production page
+        run: curl --fail --silent --show-error --retry 3 https://kimthanhtinlogistics.vn/tra-cuu-don-hang > /dev/null
+
