@@ -28,6 +28,8 @@ Gói này tương thích với source Laravel 9 hiện có trên `kimthanhtinlog
 
 Trang tải dữ liệu mới nhất từ Google Sheets mỗi lần khách hàng bấm **Tra cứu**.
 
+Header trang chủ có mục **Tra cứu đơn hàng** trỏ trực tiếp tới route `tracking.index`.
+
 ## CI/CD GitHub Actions
 
 Workflow `.github/workflows/deploy.yml` kiểm tra cú pháp PHP và tự động triển khai khi nhánh `main` có commit mới.

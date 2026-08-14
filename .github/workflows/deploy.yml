@@ -61,6 +61,9 @@ jobs:
           scp -P "$DEPLOY_PORT" -i ~/.ssh/deploy_key \
             routes/tra-cuu-don-hang.php \
             "$DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH/routes/tra-cuu-don-hang.php"
+          scp -P "$DEPLOY_PORT" -i ~/.ssh/deploy_key \
+            resources/views/frontend/partials/header.blade.php \
+            "$DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH/resources/views/frontend/partials/header.blade.php"
 
       - name: Clear Laravel cache
         env:
@@ -74,4 +77,3 @@ jobs:
 
       - name: Verify production page
         run: curl --fail --silent --show-error --retry 3 https://kimthanhtinlogistics.vn/tra-cuu-don-hang > /dev/null
-
