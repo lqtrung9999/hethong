@@ -64,6 +64,9 @@ jobs:
           scp -P "$DEPLOY_PORT" -i ~/.ssh/deploy_key \
             resources/views/frontend/partials/header.blade.php \
             "$DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH/resources/views/frontend/partials/header.blade.php"
+          scp -P "$DEPLOY_PORT" -i ~/.ssh/deploy_key \
+            public/frontend/images/logo-ktt.png \
+            "$DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH/public/frontend/images/logo-ktt.png"
 
       - name: Clear Laravel cache
         env:
