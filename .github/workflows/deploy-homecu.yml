@@ -138,3 +138,48 @@ jobs:
             https://kimthanhtinlogistics.vn/homecu/ > /tmp/homecu.html
           test -s /tmp/homecu.html
           grep -qi 'Kim Thành Tín' /tmp/homecu.html
+
+  export-source:
+    needs: snapshot
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Configure SSH
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H "$DEPLOY_HOST" >> ~/.ssh/known_hosts
+
+      - name: Export sanitized Laravel source
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_PORT: ${{ secrets.DEPLOY_PORT }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+        run: |
+          SNAPSHOT_PATH="$(dirname "$DEPLOY_PATH")/kimthanhtinlogistics-homecu"
+          ssh -p "$DEPLOY_PORT" -i ~/.ssh/deploy_key "$DEPLOY_USER@$DEPLOY_HOST" \
+            "tar -czf - \
+              --exclude='./.env' \
+              --exclude='./.git' \
+              --exclude='./vendor' \
+              --exclude='./node_modules' \
+              --exclude='./public/homecu' \
+              --exclude='./storage/logs' \
+              --exclude='./storage/framework/cache' \
+              --exclude='./storage/framework/sessions' \
+              --exclude='./storage/framework/views' \
+              -C '$SNAPSHOT_PATH' ." > legacy-laravel-source.tar.gz
+          test -s legacy-laravel-source.tar.gz
+
+      - name: Upload sanitized source artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: legacy-laravel-source
+          path: legacy-laravel-source.tar.gz
+          retention-days: 1
+          if-no-files-found: error
