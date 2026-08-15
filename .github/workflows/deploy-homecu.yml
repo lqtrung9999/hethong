@@ -1,0 +1,72 @@
+name: Deploy homepage staging
+
+on:
+  push:
+    branches: [agent/homecu]
+  workflow_dispatch:
+
+concurrency:
+  group: staging-homecu-kimthanhtinlogistics
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Validate homepage bundle
+        run: |
+          test -s public/homecu/index.html
+          test -s public/homecu/styles.css
+          test -s public/homecu/script.js
+          grep -q 'styles.css' public/homecu/index.html
+          grep -q 'script.js' public/homecu/index.html
+
+  deploy:
+    needs: validate
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Configure SSH
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H "$DEPLOY_HOST" >> ~/.ssh/known_hosts
+
+      - name: Create staging directory
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_PORT: ${{ secrets.DEPLOY_PORT }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+        run: |
+          ssh -p "$DEPLOY_PORT" -i ~/.ssh/deploy_key "$DEPLOY_USER@$DEPLOY_HOST" \
+            "mkdir -p '$DEPLOY_PATH/public/homecu'"
+
+      - name: Upload homepage staging bundle
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_PORT: ${{ secrets.DEPLOY_PORT }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+        run: |
+          scp -P "$DEPLOY_PORT" -i ~/.ssh/deploy_key -r \
+            public/homecu/. \
+            "$DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH/public/homecu/"
+
+      - name: Verify staging page
+        run: |
+          curl --fail --silent --show-error --retry 5 \
+            https://kimthanhtinlogistics.vn/homecu/ > /dev/null
