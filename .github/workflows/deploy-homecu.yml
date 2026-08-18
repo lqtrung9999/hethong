@@ -1,0 +1,140 @@
+name: Snapshot legacy Laravel to homecu
+
+on:
+  push:
+    branches: [agent/homecu]
+  workflow_dispatch:
+
+concurrency:
+  group: staging-homecu-kimthanhtinlogistics
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Configure SSH
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H "$DEPLOY_HOST" >> ~/.ssh/known_hosts
+
+      - name: Create frozen Laravel snapshot
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_PORT: ${{ secrets.DEPLOY_PORT }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+        run: |
+          ssh -p "$DEPLOY_PORT" -i ~/.ssh/deploy_key "$DEPLOY_USER@$DEPLOY_HOST" \
+            "DEPLOY_PATH='$DEPLOY_PATH' bash -s" <<'REMOTE'
+          set -euo pipefail
+
+          case "$DEPLOY_PATH" in
+            /home/*/htdocs/*) ;;
+            *) echo 'Refusing unexpected deployment path'; exit 1 ;;
+          esac
+
+          APP_PARENT="$(dirname "$DEPLOY_PATH")"
+          SNAPSHOT_PATH="$APP_PARENT/kimthanhtinlogistics-homecu"
+          MARKER="$SNAPSHOT_PATH/.homecu-snapshot-created"
+          PUBLIC_LINK="$DEPLOY_PATH/public/homecu"
+
+          if [ "$SNAPSHOT_PATH" = "$DEPLOY_PATH" ] || [ "$SNAPSHOT_PATH" = "/" ]; then
+            echo 'Refusing unsafe snapshot path'
+            exit 1
+          fi
+
+          if [ ! -f "$MARKER" ]; then
+            mkdir -p "$SNAPSHOT_PATH"
+            rsync -a \
+              --exclude='.git/' \
+              --exclude='public/homecu' \
+              --exclude='storage/logs/*' \
+              --exclude='storage/framework/cache/data/*' \
+              --exclude='storage/framework/sessions/*' \
+              --exclude='storage/framework/views/*' \
+              "$DEPLOY_PATH/" "$SNAPSHOT_PATH/"
+
+            test -s "$SNAPSHOT_PATH/artisan"
+            test -s "$SNAPSHOT_PATH/.env"
+            test -s "$SNAPSHOT_PATH/public/index.php"
+
+            upsert_env() {
+              key="$1"
+              value="$2"
+              if grep -q "^${key}=" "$SNAPSHOT_PATH/.env"; then
+                sed -i "s|^${key}=.*|${key}=${value}|" "$SNAPSHOT_PATH/.env"
+              else
+                printf '%s=%s\n' "$key" "$value" >> "$SNAPSHOT_PATH/.env"
+              fi
+            }
+
+            upsert_env APP_ENV staging
+            upsert_env APP_DEBUG false
+            upsert_env APP_URL https://kimthanhtinlogistics.vn/homecu
+            upsert_env SESSION_COOKIE kimthanhtinlogistics_homecu_session
+            upsert_env SESSION_PATH /homecu
+
+            INDEX_FILE="$SNAPSHOT_PATH/public/index.php"
+            if ! grep -q 'HOME_CU_PREFIX_REWRITE' "$INDEX_FILE"; then
+              TEMP_INDEX="$(mktemp)"
+              {
+                printf '%s\n' '<?php'
+                printf '%s\n' '// HOME_CU_PREFIX_REWRITE'
+                printf '%s\n' '$homeCuPrefix = '\''/homecu'\'';'
+                printf '%s\n' '$homeCuUri = $_SERVER['\''REQUEST_URI'\''] ?? '\''/'\'';'
+                printf '%s\n' 'if ($homeCuUri === $homeCuPrefix || str_starts_with($homeCuUri, $homeCuPrefix . '\''/'\'')) {'
+                printf '%s\n' '    $homeCuUri = substr($homeCuUri, strlen($homeCuPrefix));'
+                printf '%s\n' '    $_SERVER['\''REQUEST_URI'\''] = $homeCuUri !== '\'''\'' ? $homeCuUri : '\''/'\'';'
+                printf '%s\n' '    $_SERVER['\''SCRIPT_NAME'\''] = '\''/homecu/index.php'\'';'
+                printf '%s\n' '    $_SERVER['\''PHP_SELF'\''] = '\''/homecu/index.php'\'';'
+                printf '%s\n' '}'
+                tail -n +2 "$INDEX_FILE"
+              } > "$TEMP_INDEX"
+              mv "$TEMP_INDEX" "$INDEX_FILE"
+            fi
+
+            cd "$SNAPSHOT_PATH"
+            php artisan optimize:clear
+            php artisan config:cache
+            touch "$MARKER"
+          else
+            echo 'Frozen homecu snapshot already exists; preserving it.'
+          fi
+
+          mkdir -p "$DEPLOY_PATH/storage/app/homecu-backups"
+          if [ -L "$PUBLIC_LINK" ]; then
+            CURRENT_TARGET="$(readlink "$PUBLIC_LINK")"
+            if [ "$CURRENT_TARGET" != "$SNAPSHOT_PATH/public" ]; then
+              unlink "$PUBLIC_LINK"
+            fi
+          elif [ -e "$PUBLIC_LINK" ]; then
+            BACKUP_PATH="$DEPLOY_PATH/storage/app/homecu-backups/homecu-$(date +%Y%m%d%H%M%S)"
+            mv "$PUBLIC_LINK" "$BACKUP_PATH"
+            echo "Previous /homecu saved at $BACKUP_PATH"
+          fi
+
+          if [ ! -e "$PUBLIC_LINK" ]; then
+            ln -s "$SNAPSHOT_PATH/public" "$PUBLIC_LINK"
+          fi
+
+          test -L "$PUBLIC_LINK"
+          test "$(readlink "$PUBLIC_LINK")" = "$SNAPSHOT_PATH/public"
+          test -s "$PUBLIC_LINK/index.php"
+          REMOTE
+
+      - name: Verify legacy Laravel homepage
+        run: |
+          curl --fail --silent --show-error --retry 5 --retry-delay 3 \
+            https://kimthanhtinlogistics.vn/homecu/ > /tmp/homecu.html
+          test -s /tmp/homecu.html
+          grep -qi 'Kim Thành Tín' /tmp/homecu.html
