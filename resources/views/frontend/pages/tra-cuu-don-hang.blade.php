@@ -42,7 +42,7 @@
         </form>
         <p class="hint">Ví dụ: <code>CN081106-38HN</code> hoặc <code>CN081110-6HN</code></p>
       </div>
-      <p class="tagline">“Vận chuyển Thần Tốc Xuyên Biên Giới”</p>
+      <p class="tagline">“Vận Chuyển Chính Ngạch Thần Tốc Xuyên Biên Giới”</p>
     </div>
   </section>
 </main>
